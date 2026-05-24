@@ -85,7 +85,7 @@ function App() {
                   {courtyardPlants.map((plant) => (
                     <div key={plant.id} className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
                       <h4 className="font-semibold text-gray-800">{plant.name}</h4>
-                      <p className="text-sm text-gray-600">📍 Cell {plant.locationId}</p>
+              <p className="text-sm text-gray-600">📍 Cell {plant.locationId}</p>
                     </div>
                   ))}
                 </div>
