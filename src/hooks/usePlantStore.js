@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 const usePlantStore = create((set, get) => ({
   plants: [],
   containers: [],
-  indoorAreas: ['Shelf 1 - T5 lights', 'Germination zone'],
+  indoorAreas: ['Small Akerbar', 'Big Akerbar', 'Rudsta', 'Plant Table Top', 'Plant Table Bottom', 'Under Desk Light'],
   
   addPlant: (name, locationType, locationId) => {
     const newPlant = {

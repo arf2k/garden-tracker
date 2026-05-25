@@ -8,6 +8,7 @@ const PlantList = ({ filterType, plants, onPlantTap }) => {
   const [selectedContainer, setSelectedContainer] = useState('');
   const [newContainerName, setNewContainerName] = useState('');
   const [selectedIndoorArea, setSelectedIndoorArea] = useState('');
+  const [expandedGroups, setExpandedGroups] = useState({});
 
   const addPlant = usePlantStore((state) => state.addPlant);
   const addContainer = usePlantStore((state) => state.addContainer);
@@ -16,10 +17,28 @@ const PlantList = ({ filterType, plants, onPlantTap }) => {
 
   const filteredPlants = plants.filter((p) => p.locationType === filterType);
 
-  const getLocationLabel = (plant) => {
-    if (filterType === 'courtyard') return `📍 Cell ${plant.locationId}`;
-    if (filterType === 'container') return `🪴 Container`;
-    if (filterType === 'indoor') return `💡 ${plant.locationId}`;
+  // Group plants by location
+  const groupedPlants = filteredPlants.reduce((acc, plant) => {
+    const key = plant.locationId;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(plant);
+    return acc;
+  }, {});
+
+  const getLocationLabel = (locationId) => {
+    if (filterType === 'courtyard') return `📍 Cell ${locationId}`;
+    if (filterType === 'container') {
+      const container = containers.find((c) => c.id === locationId);
+      return `🪴 ${container?.name || 'Unknown'}`;
+    }
+    if (filterType === 'indoor') return `💡 ${locationId}`;
+  };
+
+  const toggleGroup = (groupId) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [groupId]: !prev[groupId],
+    }));
   };
 
   const handleAddPlant = () => {
@@ -63,19 +82,50 @@ const PlantList = ({ filterType, plants, onPlantTap }) => {
           </p>
         </div>
       ) : (
-        filteredPlants.map((plant) => (
-          <button
-            key={plant.id}
-            onClick={() => onPlantTap(plant.id)}
-            className="w-full bg-white rounded-lg shadow-sm p-4 text-left border-l-4 border-green-500 hover:shadow-md transition-shadow active:bg-green-50"
-          >
-            <h3 className="text-lg font-semibold text-gray-800">{plant.name}</h3>
-            <p className="text-sm text-gray-600 mt-1">{getLocationLabel(plant)}</p>
-            <p className="text-xs text-gray-500 mt-2">
-              {plant.photos.length} photo{plant.photos.length !== 1 ? 's' : ''}
-            </p>
-          </button>
-        ))
+        Object.keys(groupedPlants).sort().map((groupId) => {
+          const group = groupedPlants[groupId];
+          const isExpanded = expandedGroups[groupId] !== false; // default expanded
+
+          return (
+            <div key={groupId} className="space-y-2">
+              {/* Group Header */}
+              <button
+                onClick={() => toggleGroup(groupId)}
+                className="w-full bg-gray-100 rounded-lg p-3 flex items-center justify-between hover:bg-gray-150 transition-colors text-left"
+              >
+                <span className="font-semibold text-gray-800">
+                  {getLocationLabel(groupId)}
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs bg-green-500 text-white px-2 py-1 rounded">
+                    {group.length}
+                  </span>
+                  <span className="text-lg text-gray-600">
+                    {isExpanded ? '▼' : '▶'}
+                  </span>
+                </div>
+              </button>
+
+              {/* Group Plants (collapsible) */}
+              {isExpanded && (
+                <div className="pl-2 space-y-2">
+                  {group.map((plant) => (
+                    <button
+                      key={plant.id}
+                      onClick={() => onPlantTap(plant.id)}
+                      className="w-full bg-white rounded-lg shadow-sm p-4 text-left border-l-4 border-green-500 hover:shadow-md transition-shadow active:bg-green-50"
+                    >
+                      <h3 className="text-base font-semibold text-gray-800">{plant.name}</h3>
+                      <p className="text-xs text-gray-500 mt-2">
+                        {plant.photos.length} photo{plant.photos.length !== 1 ? 's' : ''}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })
       )}
 
       {/* Add Plant Button */}

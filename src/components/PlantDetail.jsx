@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import usePlantStore from '../hooks/usePlantStore';
 
 const PlantDetail = ({ plantId, onBack }) => {
-  const plant = usePlantStore((state) => state.getPlant(plantId));
+  const plants = usePlantStore((state) => state.plants);
+  const plant = plants.find((p) => p.id === plantId);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(plant?.name || '');
 
