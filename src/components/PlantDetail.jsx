@@ -4,6 +4,9 @@ import usePlantStore from '../hooks/usePlantStore';
 const PlantDetail = ({ plantId, onBack }) => {
   const plants = usePlantStore((state) => state.plants);
   const plant = plants.find((p) => p.id === plantId);
+  const editPlant = usePlantStore((state) => state.editPlant);
+  const deletePlant = usePlantStore((state) => state.deletePlant);
+  
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(plant?.name || '');
 
@@ -19,6 +22,20 @@ const PlantDetail = ({ plantId, onBack }) => {
     if (plant.locationType === 'courtyard') return `📍 Courtyard - Cell ${plant.locationId}`;
     if (plant.locationType === 'container') return `🪴 Container`;
     if (plant.locationType === 'indoor') return `💡 ${plant.locationId}`;
+  };
+
+  const handleSaveEdit = () => {
+    if (editName.trim()) {
+      editPlant(plantId, { name: editName });
+      setIsEditing(false);
+    }
+  };
+
+  const handleDelete = () => {
+    if (window.confirm(`Delete "${plant.name}"? This cannot be undone.`)) {
+      deletePlant(plantId);
+      onBack();
+    }
   };
 
   return (
@@ -60,7 +77,7 @@ const PlantDetail = ({ plantId, onBack }) => {
           {isEditing ? 'Cancel Edit' : 'Edit Plant'}
         </button>
 
-        {/* Edit Form (Phase 2) */}
+        {/* Edit Form */}
         {isEditing && (
           <div className="bg-gray-50 rounded-lg p-4 space-y-3">
             <div>
@@ -72,9 +89,13 @@ const PlantDetail = ({ plantId, onBack }) => {
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                autoFocus
               />
             </div>
-            <button className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg">
+            <button 
+              onClick={handleSaveEdit}
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg"
+            >
               Save Changes
             </button>
           </div>
@@ -93,9 +114,12 @@ const PlantDetail = ({ plantId, onBack }) => {
           </div>
         </div>
 
-        {/* Delete Button (Phase 2) */}
+        {/* Delete Button */}
         <div className="border-t-2 border-gray-200 pt-4">
-          <button className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-colors">
+          <button 
+            onClick={handleDelete}
+            className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-colors"
+          >
             Delete Plant
           </button>
         </div>

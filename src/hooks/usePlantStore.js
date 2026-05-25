@@ -20,6 +20,14 @@ const usePlantStore = create((set, get) => ({
     return newPlant;
   },
   
+  editPlant: (plantId, updates) => {
+    set((state) => ({
+      plants: state.plants.map((p) =>
+        p.id === plantId ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p
+      ),
+    }));
+  },
+  
   deletePlant: (plantId) => {
     set((state) => ({ plants: state.plants.filter((p) => p.id !== plantId) }));
   },
@@ -41,6 +49,7 @@ const usePlantStore = create((set, get) => ({
   loadFromStorage: (data) => {
     if (data.plants) set({ plants: data.plants });
     if (data.containers) set({ containers: data.containers });
+    if (data.indoorAreas) set({ indoorAreas: data.indoorAreas });
   },
   
   getState: () => {
